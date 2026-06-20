@@ -1,0 +1,12 @@
+{
+  "name": "ranz-license-manager",
+  "version": "1.0.0",
+  "description": "RANZ License Manager - Monitoring & Generate License Key",
+  "main": "index.html",
+  "scripts": {
+    "dev": "vercel dev"
+  },
+  "dependencies": {
+    "@vercel/kv": "^1.0.0"
+  }
+}

@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RANZ License Manager</title>
+    <style>
+        :root {
+            --bg: #0a0e17;
+            --card: #111827;
+            --card2: #1a1f2e;
+            --border: #1e293b;
+            --accent: #3b82f6;
+            --accent2: #6366f1;
+            --green: #10b981;
+            --yellow: #f59e0b;
+            --red: #ef4444;
+            --text: #e2e8f0;
+            --text2: #94a3b8;
+            --radius: 16px;
+            --shadow: 0 4px 24px rgba(0,0,0,0.4);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(ellipse at top, rgba(59,130,246,0.08) 0%, transparent 60%),
+                radial-gradient(ellipse at bottom right, rgba(99,102,241,0.05) 0%, transparent 50%);
+        }
+
+        /* ═══════════════ LOGIN PAGE ═══════════════ */
+        .login-container {
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; padding: 20px;
+        }
+        .login-box {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 40px;
+            width: 400px;
+            max-width: 100%;
+            box-shadow: var(--shadow);
+            animation: slideUp 0.5s ease;
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .login-box .logo {
+            text-align: center; margin-bottom: 30px;
+        }
+        .login-box .logo h1 {
+            font-size: 28px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+        }
+        .login-box .logo p { color: var(--text2); font-size: 14px; margin-top: 5px; }
+
+        /* ═══════════════ INPUT ═══════════════ */
+        .input-group { margin-bottom: 20px; }
+        .input-group label {
+            display: block; color: var(--text2);
+            font-size: 13px; margin-bottom: 8px;
+            font-weight: 500; letter-spacing: 0.5px;
+        }
+        .input-group input, .input-group select {
+            width: 100%; padding: 12px 16px;
+            background: var(--card2); border: 1px solid var(--border);
+            border-radius: 12px; color: var(--text);
+            font-size: 14px; outline: none;
+            transition: all 0.3s ease;
+        }
+        .input-group input:focus, .input-group select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+        }
+
+        /* ═══════════════ BUTTON ═══════════════ */
+        .btn {
+            padding: 12px 24px; border: none; border-radius: 12px;
+            font-size: 14px; font-weight: 600; cursor: pointer;
+            transition: all 0.3s ease; letter-spacing: 0.3px;
+            position: relative; overflow: hidden;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            color: white; width: 100%;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59,130,246,0.3);
+        }
+        .btn-primary:active { transform: scale(0.97); }
+        .btn-danger { background: var(--red); color: white; }
+        .btn-warning { background: var(--yellow); color: #000; }
+        .btn-success { background: var(--green); color: white; }
+        .btn-sm { padding: 8px 16px; font-size: 12px; }
+        .btn-xs { padding: 6px 12px; font-size: 11px; border-radius: 8px; }
+
+        /* ═══════════════ DASHBOARD ═══════════════ */
+        .dashboard { display: none; }
+        .sidebar {
+            position: fixed; left: 0; top: 0; bottom: 0;
+            width: 260px; background: var(--card);
+            border-right: 1px solid var(--border);
+            padding: 20px; z-index: 100;
+            transition: transform 0.3s ease;
+        }
+        .sidebar .logo-side { margin-bottom: 30px; padding: 10px 0; }
+        .sidebar .logo-side h2 {
+            font-size: 22px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+        }
+        .sidebar .nav-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px 16px; margin-bottom: 5px;
+            border-radius: 12px; cursor: pointer;
+            transition: all 0.3s ease; color: var(--text2);
+            font-size: 14px; font-weight: 500;
+        }
+        .sidebar .nav-item:hover, .sidebar .nav-item.active {
+            background: var(--card2); color: var(--text);
+        }
+        .sidebar .nav-item .icon { font-size: 20px; width: 24px; text-align: center; }
+        .sidebar .nav-item.active {
+            border-left: 3px solid var(--accent);
+            background: linear-gradient(90deg, rgba(59,130,246,0.1), transparent);
+        }
+
+        .main-content {
+            margin-left: 260px; padding: 30px;
+            animation: fadeIn 0.5s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* ═══════════════ CARDS ═══════════════ */
+        .stats-grid {
+            display: grid; grid-template-columns: repeat(4, 1fr);
+            gap: 20px; margin-bottom: 30px;
+        }
+        @media (max-width: 1024px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); }
+            .main-content { margin-left: 0; }
+            .stats-grid { grid-template-columns: 1fr; }
+        }
+
+        .stat-card {
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 24px;
+            transition: all 0.3s ease; cursor: pointer;
+            position: relative; overflow: hidden;
+        }
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow);
+        }
+        .stat-card .icon-stat {
+            font-size: 32px; margin-bottom: 10px;
+        }
+        .stat-card .value {
+            font-size: 32px; font-weight: 700;
+            background: linear-gradient(135deg, var(--text), var(--text2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .stat-card .label { color: var(--text2); font-size: 13px; margin-top: 5px; }
+        .stat-card.active { border-top: 3px solid var(--green); }
+        .stat-card.warning { border-top: 3px solid var(--yellow); }
+        .stat-card.expired { border-top: 3px solid var(--red); }
+        .stat-card.total { border-top: 3px solid var(--accent); }
+
+        /* ═══════════════ TABLE ═══════════════ */
+        .card {
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 24px;
+            margin-bottom: 20px; box-shadow: var(--shadow);
+        }
+        .card h3 { margin-bottom: 20px; font-size: 18px; font-weight: 700; }
+        table { width: 100%; border-collapse: collapse; }
+        th {
+            text-align: left; padding: 12px; color: var(--text2);
+            font-size: 12px; text-transform: uppercase;
+            letter-spacing: 1px; border-bottom: 1px solid var(--border);
+        }
+        td {
+            padding: 14px 12px; border-bottom: 1px solid var(--border);
+            font-size: 14px;
+        }
+        tr { transition: background 0.2s; }
+        tr:hover { background: var(--card2); }
+
+        .badge {
+            padding: 4px 12px; border-radius: 20px;
+            font-size: 11px; font-weight: 600;
+        }
+        .badge-success { background: rgba(16,185,129,0.15); color: var(--green); }
+        .badge-warning { background: rgba(245,158,11,0.15); color: var(--yellow); }
+        .badge-danger { background: rgba(239,68,68,0.15); color: var(--red); }
+        .badge-info { background: rgba(59,130,246,0.15); color: var(--accent); }
+
+        /* ═══════════════ GENERATE SECTION ═══════════════ */
+        .generate-box {
+            background: linear-gradient(135deg, var(--card), var(--card2));
+            border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 30px;
+            max-width: 600px;
+        }
+        .result-box {
+            background: var(--bg); border: 1px solid var(--border);
+            border-radius: 12px; padding: 16px; margin-top: 20px;
+            display: none; animation: slideUp 0.4s ease;
+        }
+        .result-box code {
+            font-size: 16px; word-break: break-all;
+            color: var(--green); font-family: monospace;
+        }
+
+        /* ═══════════════ TOAST ═══════════════ */
+        .toast {
+            position: fixed; top: 20px; right: 20px;
+            padding: 16px 24px; border-radius: 12px;
+            color: white; font-weight: 600; z-index: 999;
+            animation: slideIn 0.3s ease;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+        }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(100px); } to { opacity: 1; transform: translateX(0); } }
+        .toast-success { background: var(--green); }
+        .toast-error { background: var(--red); }
+
+        /* ═══════════════ LOADING ═══════════════ */
+        .loading {
+            display: inline-block; width: 20px; height: 20px;
+            border: 2px solid transparent; border-top-color: white;
+            border-radius: 50%; animation: spin 0.6s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ═══════════════ MOBILE MENU ═══════════════ */
+        .menu-toggle {
+            display: none; position: fixed; top: 20px; left: 20px;
+            z-index: 200; background: var(--card); border: 1px solid var(--border);
+            border-radius: 12px; padding: 10px; cursor: pointer;
+            font-size: 24px; color: var(--text);
+        }
+        @media (max-width: 768px) { .menu-toggle { display: block; } }
+
+        /* Animasi pulse */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .pulse { animation: pulse 2s infinite; }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    </style>
+</head>
+<body>
+
+    <!-- ═══════════════ LOGIN ═══════════════ -->
+    <div class="login-container" id="loginPage">
+        <div class="login-box">
+            <div class="logo">
+                <h1>🔐 RANZ MANAGER</h1>
+                <p>License Management System</p>
+            </div>
+            <div class="input-group">
+                <label>🔑 PASSWORD</label>
+                <input type="password" id="loginPassword" placeholder="Masukkan password..." onkeydown="if(event.key==='Enter')login()">
+            </div>
+            <button class="btn btn-primary" onclick="login()">
+                <span id="loginBtnText">🚀 MASUK</span>
+            </button>
+            <p style="text-align:center;margin-top:15px;color:var(--text2);font-size:12px;">© 2026 RANZ OFFC - All Rights Reserved</p>
+        </div>
+    </div>
+
+    <!-- ═══════════════ DASHBOARD ═══════════════ -->
+    <div class="dashboard" id="dashboard">
+        
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar">
+            <div class="logo-side">
+                <h2>🔐 RANZ</h2>
+                <p style="color:var(--text2);font-size:11px;">License Manager v1.0</p>
+            </div>
+            <div class="nav-item active" onclick="showPage('dashboard')">
+                <span class="icon">📊</span> Dashboard
+            </div>
+            <div class="nav-item" onclick="showPage('generate')">
+                <span class="icon">🔑</span> Generate Key
+            </div>
+            <div class="nav-item" onclick="showPage('customers')">
+                <span class="icon">👥</span> Customers
+            </div>
+            <div class="nav-item" onclick="showPage('live')">
+                <span class="icon">📡</span> Live Status
+            </div>
+            <div class="nav-item" onclick="showPage('logs')">
+                <span class="icon">📜</span> Log Aktivitas
+            </div>
+            <div style="position:absolute;bottom:20px;left:20px;right:20px;">
+                <button class="btn btn-danger btn-sm" style="width:100%;" onclick="logout()">🚪 Logout</button>
+            </div>
+        </div>
+
+        <!-- Toggle Mobile -->
+        <button class="menu-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+
+        <!-- Main Content -->
+        <div class="main-content" id="mainContent">
+            <!-- Page content loaded dynamically -->
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast" style="display:none;"></div>
+
+    <script>
+        // ═══════════════ CONFIG ═══════════════
+        const API = '/api';
+        let password = '';
+        let currentPage = 'dashboard';
+
+        // ═══════════════ LOGIN ═══════════════
+        async function login() {
+            const pwd = document.getElementById('loginPassword').value;
+            if (!pwd) return toast('Masukkan password!', 'error');
+            
+            document.getElementById('loginBtnText').innerHTML = '<span class="loading"></span> Loading...';
+            
+            try {
+                const res = await fetch(`${API}/status?password=${encodeURIComponent(pwd)}`);
+                const data = await res.json();
+                
+                if (data.ok) {
+                    password = pwd;
+                    document.getElementById('loginPage').style.display = 'none';
+                    document.getElementById('dashboard').style.display = 'block';
+                    loadDashboard(data);
+                    toast('✅ Login berhasil!', 'success');
+                } else {
+                    toast('❌ Password salah!', 'error');
+                }
+            } catch(e) {
+                toast('❌ Gagal koneksi!', 'error');
+            }
+            
+            document.getElementById('loginBtnText').innerHTML = '🚀 MASUK';
+        }
+
+        // ═══════════════ LOGOUT ═══════════════
+        function logout() {
+            password = '';
+            document.getElementById('loginPage').style.display = 'flex';
+            document.getElementById('dashboard').style.display = 'none';
+            document.getElementById('loginPassword').value = '';
+        }
+
+        // ═══════════════ TOAST ═══════════════
+        function toast(msg, type) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.className = `toast toast-${type}`;
+            t.style.display = 'block';
+            setTimeout(() => t.style.display = 'none', 3000);
+        }
+
+        // ═══════════════ LOAD DASHBOARD ═══════════════
+        async function loadDashboard(data) {
+            const stats = data.stats;
+            const content = `
+                <h2 style="margin-bottom:25px;">📊 Dashboard</h2>
+                
+                <div class="stats-grid">
+                    <div class="stat-card total" onclick="showPage('customers')">
+                        <div class="icon-stat">👥</div>
+                        <div class="value">${stats.total_customers}</div>
+                        <div class="label">Total Customers</div>
+                    </div>
+                    <div class="stat-card active">
+                        <div class="icon-stat">🟢</div>
+                        <div class="value">${stats.active_licenses}</div>
+                        <div class="label">License Aktif</div>
+                    </div>
+                    <div class="stat-card warning">
+                        <div class="icon-stat">🟡</div>
+                        <div class="value">${stats.frozen_licenses}</div>
+                        <div class="label">Di-Freeze</div>
+                    </div>
+                    <div class="stat-card expired">
+                        <div class="icon-stat">🔴</div>
+                        <div class="value">${stats.expired_licenses}</div>
+                        <div class="label">Expired</div>
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card" style="border-top:3px solid #8b5cf6;">
+                        <div class="icon-stat">📡</div>
+                        <div class="value">${stats.online_now}</div>
+                        <div class="label">Online Sekarang</div>
+                    </div>
+                    <div class="stat-card" style="border-top:3px solid #ec4899;">
+                        <div class="icon-stat">⏱️</div>
+                        <div class="value" id="totalUptime">-</div>
+                        <div class="label">Total Uptime</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>🟢 Customer Online</h3>
+                    <div id="onlineList">Loading...</div>
+                </div>
+            `;
+            
+            document.getElementById('mainContent').innerHTML = content;
+            updateOnlineList(data.customers);
+            
+            // Auto refresh tiap 30 detik
+            setInterval(refreshData, 30000);
+        }
+
+        function updateOnlineList(customers) {
+            const online = customers.filter(c => c.is_online);
+            if (online.length === 0) {
+                document.getElementById('onlineList').innerHTML = '<p style="color:var(--text2);">Tidak ada customer online saat ini.</p>';
+                return;
+            }
+            
+            let html = '<table><tr><th>Customer</th><th>License</th><th>Status</th><th>Aksi</th></tr>';
+            online.forEach(c => {
+                html += `
+                    <tr>
+                        <td><b>${c.customer_id}</b></td>
+                        <td><code style="font-size:11px;">${c.license_key.slice(0,20)}...</code></td>
+                        <td><span class="badge badge-success">Online</span></td>
+                        <td>
+                            <button class="btn btn-warning btn-xs" onclick="freezeCustomer('${c.license_key}')">🛑 Freeze</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            html += '</table>';
+            document.getElementById('onlineList').innerHTML = html;
+        }
+
+        // ═══════════════ GENERATE PAGE ═══════════════
+        function showGeneratePage() {
+            const content = `
+                <h2 style="margin-bottom:25px;">🔑 Generate License Key</h2>
+                
+                <div class="generate-box">
+                    <div class="input-group">
+                        <label>👤 CUSTOMER ID</label>
+                        <input type="text" id="genCustomerId" placeholder="Contoh: CUST001">
+                    </div>
+                    <div class="input-group">
+                        <label>🤖 BOT TOKEN</label>
+                        <input type="text" id="genBotToken" placeholder="123456:ABC... (dari @BotFather)">
+                    </div>
+                    <div class="input-group">
+                        <label>⏱️ DURASI</label>
+                        <select id="genDuration">
+                            <option value="7">7 Hari</option>
+                            <option value="30" selected>30 Hari</option>
+                            <option value="90">90 Hari</option>
+                            <option value="180">180 Hari</option>
+                            <option value="365">365 Hari</option>
+                            <option value="lifetime">Lifetime</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary" onclick="generateKey()">
+                        <span id="genBtnText">🎲 GENERATE KEY</span>
+                    </button>
+                    
+                    <div class="result-box" id="resultBox">
+                        <p style="color:var(--green);margin-bottom:10px;">✅ <b>License Generated!</b></p>
+                        <code id="resultKey"></code>
+                        <br><br>
+                        <button class="btn btn-success btn-sm" onclick="copyKey()">📋 Copy</button>
+                    </div>
+                </div>
+            `;
+            document.getElementById('mainContent').innerHTML = content;
+        }
+
+        async function generateKey() {
+            const customerId = document.getElementById('genCustomerId').value.trim();
+            const botToken = document.getElementById('genBotToken').value.trim();
+            const duration = document.getElementById('genDuration').value;
+            
+            if (!customerId || !botToken) return toast('Isi semua data!', 'error');
+            if (!botToken.includes(':')) return toast('Bot token tidak valid!', 'error');
+            
+            document.getElementById('genBtnText').innerHTML = '<span class="loading"></span> Generating...';
+            
+            try {
+                const res = await fetch(`${API}/generate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password, customer_id: customerId, bot_token: botToken, duration })
+                });
+                const data = await res.json();
+                
+                if (data.ok) {
+                    document.getElementById('resultBox').style.display = 'block';
+                    document.getElementById('resultKey').textContent = data.license_key;
+                    toast('✅ License berhasil dibuat!', 'success');
+                } else {
+                    toast('❌ ' + data.reason, 'error');
+                }
+            } catch(e) {
+                toast('❌ Gagal koneksi!', 'error');
+            }
+            
+            document.getElementById('genBtnText').innerHTML = '🎲 GENERATE KEY';
+        }
+
+        function copyKey() {
+            const key = document.getElementById('resultKey').textContent;
+            navigator.clipboard.writeText(key).then(() => toast('📋 Copied!', 'success'));
+        }
+
+        // ═══════════════ FREEZE ═══════════════
+        async function freezeCustomer(license) {
+            if (!confirm('Yakin bekukan customer ini?')) return;
+            
+            try {
+                const res = await fetch(`${API}/freeze`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password, license, action: 'freeze' })
+                });
+                const data = await res.json();
+                if (data.ok) {
+                    toast('🛑 Customer dibekukan!', 'success');
+                    refreshData();
+                }
+            } catch(e) {
+                toast('❌ Gagal!', 'error');
+            }
+        }
+
+        async function unfreezeCustomer(license) {
+            try {
+                const res = await fetch(`${API}/freeze`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password, license, action: 'unfreeze' })
+                });
+                const data = await res.json();
+                if (data.ok) {
+                    toast('🟢 Customer diaktifkan!', 'success');
+                    refreshData();
+                }
+            } catch(e) {}
+        }
+
+        async function deleteCustomer(license) {
+            if (!confirm('Yakin hapus permanen?')) return;
+            
+            try {
+                const res = await fetch(`${API}/freeze`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password, license, action: 'delete' })
+                });
+                const data = await res.json();
+                if (data.ok) {
+                    toast('🗑️ Dihapus!', 'success');
+                    refreshData();
+                }
+            } catch(e) {}
+        }
+
+        // ═══════════════ SHOW CUSTOMERS PAGE ═══════════════
+        async function showCustomersPage() {
+            const content = `
+                <h2 style="margin-bottom:25px;">👥 Customers</h2>
+                <div id="customersList">Loading...</div>
+            `;
+            document.getElementById('mainContent').innerHTML = content;
+            
+            const res = await fetch(`${API}/status?password=${encodeURIComponent(password)}`);
+            const data = await res.json();
+            
+            let html = '<div class="card"><table><tr><th>Customer</th><th>License</th><th>Status</th><th>Expired</th><th>Online</th><th>Aksi</th></tr>';
+            
+            data.customers.forEach(c => {
+                const statusBadge = c.status === 'active' ? 'badge-success' : c.status === 'frozen' ? 'badge-warning' : 'badge-danger';
+                const statusText = c.status === 'active' ? 'Aktif' : c.status === 'frozen' ? 'Frozen' : 'Expired';
+                const expiredText = c.expires_at ? new Date(c.expires_at).toLocaleDateString('id-ID') : 'Lifetime';
+                const onlineIcon = c.is_online ? '🟢' : '🔴';
+                
+                html += `
+                    <tr>
+                        <td><b>${c.customer_id}</b></td>
+                        <td><code style="font-size:11px;">${c.license_key.slice(0,15)}...</code></td>
+                        <td><span class="badge ${statusBadge}">${statusText}</span></td>
+                        <td>${expiredText}</td>
+                        <td>${onlineIcon}</td>
+                        <td>
+                            ${c.status === 'active' ? `<button class="btn btn-warning btn-xs" onclick="freezeCustomer('${c.license_key}')">Freeze</button>` : ''}
+                            ${c.status === 'frozen' ? `<button class="btn btn-success btn-xs" onclick="unfreezeCustomer('${c.license_key}')">Unfreeze</button>` : ''}
+                            <button class="btn btn-danger btn-xs" onclick="deleteCustomer('${c.license_key}')">🗑️</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            html += '</table></div>';
+            document.getElementById('customersList').innerHTML = html;
+        }
+
+        // ═══════════════ SHOW LOGS PAGE ═══════════════
+        async function showLogsPage() {
+            const res = await fetch(`${API}/status?password=${encodeURIComponent(password)}`);
+            const data = await res.json();
+            
+            let html = '<h2 style="margin-bottom:25px;">📜 Log Aktivitas</h2><div class="card"><table><tr><th>Waktu</th><th>Customer</th><th>Aksi</th><th>Detail</th></tr>';
+            
+            data.logs.forEach(log => {
+                const time = new Date(log.time).toLocaleString('id-ID');
+                html += `
+                    <tr>
+                        <td>${time}</td>
+                        <td><b>${log.customer}</b></td>
+                        <td>${log.action}</td>
+                        <td>${log.detail || '-'}</td>
+                    </tr>
+                `;
+            });
+            
+            html += '</table></div>';
+            document.getElementById('mainContent').innerHTML = html;
+        }
+
+        // ═══════════════ NAVIGATION ═══════════════
+        function showPage(page) {
+            currentPage = page;
+            
+            // Update sidebar active
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(el => {
+                if (el.textContent.toLowerCase().includes(page)) el.classList.add('active');
+            });
+            
+            // Close mobile sidebar
+            document.getElementById('sidebar').classList.remove('open');
+            
+            switch(page) {
+                case 'dashboard': refreshData(); break;
+                case 'generate': showGeneratePage(); break;
+                case 'customers': showCustomersPage(); break;
+                case 'live': refreshData(); break;
+                case 'logs': showLogsPage(); break;
+            }
+        }
+
+        async function refreshData() {
+            try {
+                const res = await fetch(`${API}/status?password=${encodeURIComponent(password)}`);
+                const data = await res.json();
+                if (data.ok && currentPage === 'dashboard') {
+                    loadDashboard(data);
+                }
+            } catch(e) {}
+        }
+    </script>
+</body>
+</html>
